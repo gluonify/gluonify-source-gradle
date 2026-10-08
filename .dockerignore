@@ -1,0 +1,6 @@
+# the native build context must contain sources only: generated folders (built UI, npm dependencies, Gradle output) would get in Quinoa's way
+**/node_modules
+**/dist
+build
+.gradle
+.git

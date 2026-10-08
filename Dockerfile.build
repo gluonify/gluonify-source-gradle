@@ -1,0 +1,20 @@
+# glibc native executable of gluonify-source (architecture of the Docker host: arm64 on Apple Silicon, amd64 on an x86_64 server), dynamically linked against glibc 2.34 or later (Debian 12/13, Ubuntu 22.04+).
+# This is what Gluonify runs: a single file, no JVM. Usage:
+#   docker build --target out --output type=local,dest=dist -f Dockerfile.build .      ->  dist/gluonify-source
+# STANDALONE project: no extra context (unlike Gluonify's internal components, which receive the parent POM of gluonify-plasma).
+# The Vue UI (Quinoa) is built with the system Node (the one Quinoa would download is linked to glibc, not to this image) and embedded in the executable.
+# Gradle comes from the project's wrapper (gradlew), downloaded into the cache volume on the first build.
+FROM bellsoft/liberica-native-image-kit-container:jdk-25-nik-25-glibc AS build
+RUN apk add --no-cache zlib-dev nodejs npm
+WORKDIR /src
+COPY gradlew settings.gradle.kts build.gradle.kts gradle.properties ./
+COPY gradle gradle
+COPY src src
+# Cross build under emulation (qemu, e.g. x86_64 on Apple Silicon): jspawnhelper fails (code 127), processes must be launched with vfork:
+#   --build-arg GRADLE_OPTS=-Djdk.lang.Process.launchMechanism=VFORK
+ARG GRADLE_OPTS=
+ENV GRADLE_OPTS=${GRADLE_OPTS}
+# the executable is built by NIK itself here (no container-build: this image already holds native-image)
+RUN --mount=type=cache,target=/root/.gradle ./gradlew --no-daemon --console=plain build -x test -Dquarkus.native.enabled=true -Dquarkus.package.jar.enabled=false -Dquarkus.quinoa.package-manager-install=false
+FROM scratch AS out
+COPY --from=build /src/build/*-runner /gluonify-source
