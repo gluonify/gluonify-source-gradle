@@ -4,4 +4,4 @@ Variante Gradle (Kotlin DSL) de `gluonify-source` : même service, même code, m
 
 ## Pas encore fait
 - [ ] Vérifier périodiquement que ce dépôt reste synchronisé avec `gluonify-source` (aucune automatisation de synchronisation pour l'instant : copie manuelle).
-- [ ] Le README de `gluonify-source` ne renvoie pas encore vers cette variante (voir son propre `plan.md`).
+- [x] Le README de `gluonify-source` renvoie vers cette variante (citation en tête des cinq README, 2026-10-08).
