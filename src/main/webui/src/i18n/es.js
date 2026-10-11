@@ -1,6 +1,10 @@
 // Español. Mismas claves que en.js.
 export default {
-  pageTitle: 'gluonify-source',
+  pageTitle: 'Source',
+  logo: 'Logotipo de Gluonify Source',
+  appRole: "Aplicación de partida",
+  appParticle: "Fuente",
+  copyright: '© {year} Gluonify',
   lead: 'Aplicación de ejemplo para Gluonify: un servicio REST, esta interfaz y los servicios de la plataforma.',
   language: 'Idioma',
   authTitle: 'Autenticación',
@@ -23,6 +27,11 @@ export default {
   errUnauthenticated: 'No autenticado: pegue un token de Charm más abajo.',
   errForbiddenRead: 'Token válido, pero sin el rol {role}.',
   errForbiddenWrite: 'Se necesita el rol {role} para crear una nota.',
+  documentsTitle: 'Documentos',
+  documentsHint: 'Genera una factura en PDF con Crystallon a partir de datos de ejemplo. Su token de Charm se transmite a Crystallon: debe llevar la audiencia {audience} y el rol {role}.',
+  documentsHintPlatform: 'Genera una factura en PDF con Crystallon a partir de datos de ejemplo. Crystallon se llama con el token propio de la aplicación, proporcionado por la plataforma: su token solo debe abrir esta API.',
+  documentsDownload: 'Descargar una factura de ejemplo',
+  documentsWorking: 'Generando el PDF…',
   platformTitle: 'Lo que ofrece la plataforma',
   environment: 'Entorno',
   replica: 'Réplica',

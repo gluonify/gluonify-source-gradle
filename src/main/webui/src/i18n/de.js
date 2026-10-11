@@ -1,6 +1,10 @@
 // Deutsch. Dieselben Schlüssel wie in en.js.
 export default {
-  pageTitle: 'gluonify-source',
+  pageTitle: 'Source',
+  logo: 'Gluonify-Source-Logo',
+  appRole: "Startanwendung",
+  appParticle: "Quelle",
+  copyright: '© {year} Gluonify',
   lead: 'Beispielanwendung für Gluonify: ein REST-Dienst, diese Oberfläche und die Dienste der Plattform.',
   language: 'Sprache',
   authTitle: 'Authentifizierung',
@@ -23,6 +27,11 @@ export default {
   errUnauthenticated: 'Nicht authentifiziert: Fügen Sie unten ein Charm-Token ein.',
   errForbiddenRead: 'Gültiges Token, aber ohne die Rolle {role}.',
   errForbiddenWrite: 'Zum Erstellen einer Notiz ist die Rolle {role} erforderlich.',
+  documentsTitle: 'Dokumente',
+  documentsHint: 'Erzeugt mit Crystallon eine PDF-Rechnung aus Beispieldaten. Ihr Charm-Token wird an Crystallon weitergeleitet: Es muss die Audience {audience} und die Rolle {role} tragen.',
+  documentsHintPlatform: 'Erzeugt mit Crystallon eine PDF-Rechnung aus Beispieldaten. Crystallon wird mit dem eigenen Token der Anwendung aufgerufen, den die Plattform bereitstellt: Ihr Token muss nur diese API öffnen.',
+  documentsDownload: 'Beispielrechnung herunterladen',
+  documentsWorking: 'PDF wird erzeugt…',
   platformTitle: 'Was die Plattform bereitstellt',
   environment: 'Umgebung',
   replica: 'Replikat',

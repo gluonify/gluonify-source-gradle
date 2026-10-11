@@ -1,6 +1,10 @@
 // English (default language). Keys are shared by all language files; {name} marks a parameter.
 export default {
-  pageTitle: 'gluonify-source',
+  pageTitle: 'Source',
+  logo: 'Gluonify Source logo',
+  appRole: "Starter application",
+  appParticle: "Source",
+  copyright: '© {year} Gluonify',
   lead: 'Sample application for Gluonify: a REST service, this interface, and the platform services.',
   language: 'Language',
   authTitle: 'Authentication',
@@ -23,6 +27,11 @@ export default {
   errUnauthenticated: 'Not authenticated: paste a Charm token below.',
   errForbiddenRead: 'Valid token, but without the {role} role.',
   errForbiddenWrite: 'The {role} role is required to create a note.',
+  documentsTitle: 'Documents',
+  documentsHint: 'Generates a PDF invoice with Crystallon from sample data. Your Charm token is forwarded to Crystallon: it must carry the audience {audience} and the role {role}.',
+  documentsHintPlatform: "Generates a PDF invoice with Crystallon from sample data. Crystallon is called with the application's own token, provided by the platform: your token only has to open this API.",
+  documentsDownload: 'Download sample invoice',
+  documentsWorking: 'Generating the PDF…',
   platformTitle: 'What the platform provides',
   environment: 'Environment',
   replica: 'Replica',

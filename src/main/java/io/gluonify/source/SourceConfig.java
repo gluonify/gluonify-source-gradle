@@ -10,7 +10,7 @@ import java.util.Optional;
  */
 @ConfigMapping(prefix = "source")
 public interface SourceConfig {
-    /** memory (default, development), files (/distributed/std) or graph (Gdown). */
+    /** memory (default, development), files (/distributed/std) or gdown (Gdown). */
     @WithDefault("memory")
     String store();
 
@@ -19,6 +19,8 @@ public interface SourceConfig {
     Graph graph();
 
     Webhook webhook();
+
+    Crystallon crystallon();
 
     interface Files {
         @WithDefault("/distributed/std/notes")
@@ -41,5 +43,26 @@ public interface SourceConfig {
     interface Webhook {
         /** Key that Photon sends in the X-Api-Key header (configured in the webhook target). Absent: the receiver is closed (404). */
         Optional<String> key();
+    }
+
+    interface Crystallon {
+        /**
+         * Address of Crystallon (PDF documents), provided by the platform as GLUONIFY_SERVICE_CRYSTALLON_URL when the application is deployed with "uses": ["crystallon"].
+         * Absent or blank: the documents feature is off ({@code POST /api/documents/invoice} answers 404) and the rest of the application is not affected.
+         */
+        Optional<String> url();
+
+        /**
+         * Which token Crystallon receives: {@code forwarding} (the default when absent or blank; the bearer token of the person calling this application, so Crystallon sees
+         * that person) or {@code platform} (the application's own token, provided by the platform; works outside a request too). A mode, never a token: see {@code TokenMode}.
+         * Optional, not {@code @WithDefault}: application.properties maps it to {@code ${SOURCE_CRYSTALLON_TOKEN:}}, and SmallRye treats that empty value as "no default applies".
+         */
+        Optional<String> token();
+
+        /**
+         * The file of the application's own token, for {@code token=platform}: {@code GLUONIFY_CRYSTALLON_TOKEN_FILE}, provided and renewed by the platform when the application is
+         * deployed with {@code "uses": ["crystallon"]}. Read again at every call, so a renewal is taken into account. Absent while {@code token=platform}: the application fails to start.
+         */
+        Optional<String> tokenFile();
     }
 }

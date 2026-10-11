@@ -1,7 +1,8 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { api, token } from './api.js'
+import { api, token, SAMPLE_INVOICE } from './api.js'
 import { useI18n } from './i18n/index.js'
+import BrandLogo from './BrandLogo.vue'
 
 const { t, locale, setLanguage, languages } = useI18n()
 
@@ -14,6 +15,9 @@ const jwt = ref(token.get())
 // Error shown: { key, params } (translated at display time, so a language change applies) or { text } (API message shown as returned).
 const error = ref(null)
 const loading = ref(false)
+const documentWorking = ref(false)
+const SEP = '\u00b7' // separator between the name and the role of the header
+const year = new Date().getFullYear()
 
 async function refresh() {
   loading.value = true
@@ -50,6 +54,32 @@ async function remove(id) {
   }
 }
 
+// Hands a downloaded file to the browser (a temporary link to the blob).
+function saveFile(blob, name) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = name
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 10000)
+}
+
+// The sample invoice: POST /api/documents/invoice (the API forwards the token to Crystallon, or uses the application's own token: platform.documentsToken says which).
+// A 403 without a message is the API's own role check; with a message it is Crystallon's refusal, shown as received like every API message.
+async function downloadInvoice() {
+  error.value = null
+  documentWorking.value = true
+  try {
+    saveFile(await api.invoice(), `invoice-${SAMPLE_INVOICE.number}.pdf`)
+  } catch (e) {
+    error.value = e.status === 401 ? { key: 'errUnauthenticated' } : e.status === 403 && !e.apiMessage ? { key: 'errForbiddenRead', params: { role: 'source:read' } } : { text: e.message }
+  } finally {
+    documentWorking.value = false
+  }
+}
+
 function saveToken() {
   token.set(jwt.value.trim())
   refresh()
@@ -61,7 +91,7 @@ onMounted(refresh)
 <template>
   <main>
     <header class="top">
-      <h1>gluonify-source</h1>
+      <h1><BrandLogo :label="t('logo')" /> <span class="brandtext"><span class="line"><span class="name">{{ t('pageTitle') }} {{ SEP }}</span> <span class="role">{{ t('appRole') }}</span></span><span class="particle">{{ t('appParticle') }}</span></span></h1>
       <label class="lang">
         <span class="sr-only">{{ t('language') }}</span>
         <select :value="locale" :aria-label="t('language')" @change="setLanguage($event.target.value)">
@@ -104,6 +134,12 @@ onMounted(refresh)
       <button type="button" @click="refresh">{{ t('refresh') }}</button>
     </section>
 
+    <section v-if="platform && platform.documents">
+      <h2>{{ t('documentsTitle') }}</h2>
+      <p class="hint">{{ t(platform.documentsToken === 'platform' ? 'documentsHintPlatform' : 'documentsHint', { audience: 'gluonify-crystallon', role: 'gluonify:crystallon:render' }) }}</p>
+      <button type="button" :disabled="documentWorking" @click="downloadInvoice">{{ documentWorking ? t('documentsWorking') : t('documentsDownload') }}</button>
+    </section>
+
     <section v-if="platform">
       <h2>{{ t('platformTitle') }}</h2>
       <dl class="grid">
@@ -114,5 +150,6 @@ onMounted(refresh)
         <dt>{{ t('webhooks') }}</dt><dd>{{ platform.webhookOpen ? t('open') : t('closed') }} — {{ t('received') }}: {{ platform.webhooks.accepted }}, {{ t('duplicates') }}: {{ platform.webhooks.duplicates }}</dd>
       </dl>
     </section>
+    <footer class="foot">{{ t('copyright', { year }) }}</footer>
   </main>
 </template>

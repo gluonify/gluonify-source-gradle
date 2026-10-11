@@ -1,6 +1,8 @@
 package io.gluonify.source.platform;
 
+import io.gluonify.plasma.crystallon.client.CrystallonClient;
 import io.gluonify.source.SourceConfig;
+import io.gluonify.source.documents.TokenMode;
 import io.gluonify.source.notes.NoteStore;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -17,6 +19,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -41,6 +44,8 @@ public class PlatformResource {
     NoteStore store;
     @Inject
     WebhookResource webhooks;
+    @Inject
+    Optional<CrystallonClient> crystallon; // empty when Crystallon is not configured (documents feature off)
 
     /** The environment variables: replaceable in tests. */
     Supplier<Map<String, String>> env = System::getenv;
@@ -64,6 +69,8 @@ public class PlatformResource {
         out.put("storeReady", store.ready());
         out.put("webhooks", webhooks.counters());
         out.put("webhookOpen", config.webhook().key().filter(k -> !k.isBlank()).isPresent());
+        out.put("documents", crystallon.isPresent());
+        out.put("documentsToken", crystallon.isPresent() ? TokenMode.of(config.crystallon().token()).id() : ""); // which token Crystallon receives; a mode, never a token
         return out;
     }
 
