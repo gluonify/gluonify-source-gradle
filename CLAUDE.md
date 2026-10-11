@@ -9,7 +9,7 @@ Shared context for every gluonify-* repository (rules, build order, pitfalls, co
 ## Commands
 - `./gradlew quarkusDev`: development (hot reload, UI at http://localhost:8080, **no token needed**: the "dev" identity exists only in this profile).
 - `./gradlew test`: 63 Java tests (REST, stores, webhooks, platform, documents, conformity). The UI is tested separately: `cd src/main/webui && npm test` (31 tests).
-- The Gluonify SDK (`gluonify-plasma-quarkus`, test scope `gluonify-plasma-testing`; `gluonifySdkVersion` is `0.1.0-SNAPSHOT`, from `mavenLocal()`, until the next platform release publishes them) comes from the Maven repository of gluonify-sea (Gradle property `gluonify.sea.maven.url` in `gradle.properties`, default `https://images.gluonify.io/maven`; the SDK version is `gluonifySdkVersion`, same file); to build against another copy: `./gradlew test -Pgluonify.sea.maven.url=file:///path/to/repository`.
+- The Gluonify SDK (`gluonify-plasma-quarkus`, test scope `gluonify-plasma-testing`; `gluonifySdkVersion` is `0.7.0`, published on sea; no `mavenLocal()`) comes from the Maven repository of gluonify-sea (Gradle property `gluonify.sea.maven.url` in `gradle.properties`, default `https://images.gluonify.io/maven`; the SDK version is `gluonifySdkVersion`, same file); to build against another copy: `./gradlew test -Pgluonify.sea.maven.url=file:///path/to/repository`.
 - Native (what Gluonify runs): `docker build --target out --output type=local,dest=dist -f Dockerfile.build .` -> `dist/gluonify-source`.
 - Rename the project: `python3 scripts/rename.py <groupId> <artifactId> [<package>]`, then `./gradlew test`.
 - Java 25, Quarkus 4.0.0.Beta1, Jackson 3 (`tools.jackson.databind`, not `com.fasterxml`), GraalVM native (NIK 25).

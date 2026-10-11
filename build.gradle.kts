@@ -18,11 +18,6 @@ val seaMavenUrl = providers.gradleProperty("gluonify.sea.maven.url").get()
 
 repositories {
     mavenCentral()
-    // gluonify-plasma-quarkus and gluonify-plasma-testing are not in a published SDK release yet (0.6.0 has the Crystallon client only): the SNAPSHOT comes from the local Maven repository
-    // ("mvn install" in gluonify-plasma). Remove this block once gluonifySdkVersion is a published release.
-    mavenLocal {
-        content { includeGroup("io.gluonify.plasma") }
-    }
     // Added to Maven Central, not instead of it. Gluonify's builder (Bup) declares this same repository itself for the builds it runs.
     maven {
         name = "gluonify-sea"
