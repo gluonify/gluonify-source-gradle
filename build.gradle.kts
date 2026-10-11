@@ -18,6 +18,11 @@ val seaMavenUrl = providers.gradleProperty("gluonify.sea.maven.url").get()
 
 repositories {
     mavenCentral()
+    // gluonify-plasma-quarkus and gluonify-plasma-testing are not in a published SDK release yet (0.6.0 has the Crystallon client only): the SNAPSHOT comes from the local Maven repository
+    // ("mvn install" in gluonify-plasma). Remove this block once gluonifySdkVersion is a published release.
+    mavenLocal {
+        content { includeGroup("io.gluonify.plasma") }
+    }
     // Added to Maven Central, not instead of it. Gluonify's builder (Bup) declares this same repository itself for the builds it runs.
     maven {
         name = "gluonify-sea"
@@ -42,9 +47,12 @@ dependencies {
     implementation("io.quarkus:quarkus-micrometer-registry-prometheus")
     // Web UI: Quinoa builds and serves the Vue project in src/main/webui
     implementation("io.quarkiverse.quinoa:quarkus-quinoa:$quinoaVersion")
-    // PDF documents: the Crystallon client of the Gluonify SDK (Java 17, no CDI; it uses the Jackson of the application, here Jackson 3). Optional at run time: see io.gluonify.source.documents
-    implementation("io.gluonify.plasma:gluonify-plasma-crystallon-client:$gluonifySdkVersion")
+    // Gluonify SDK, zero configuration: default CDI beans for the services (CrystallonClient, with the address and the token found by the SDK: platform, "gluonify login", fake services in tests);
+    // brings gluonify-plasma-services and gluonify-plasma-crystallon-client. Crystallon stays optional at run time: see io.gluonify.source.documents
+    implementation("io.gluonify.plasma:gluonify-plasma-quarkus:$gluonifySdkVersion")
 
+    // Fake Gluonify services for tests (GluonifyTestServices.start() / close()): a fake Crystallon, nothing to configure
+    testImplementation("io.gluonify.plasma:gluonify-plasma-testing:$gluonifySdkVersion")
     testImplementation("io.quarkus:quarkus-junit")
     testImplementation("io.quarkus:quarkus-test-security")
     testImplementation("io.rest-assured:rest-assured")
@@ -61,4 +69,6 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.test {
     systemProperty("java.util.logging.manager", "org.jboss.logmanager.LogManager")
+    // Tests never depend on the machine: no cluster known (an empty folder instead of ~/.gluonify), so Crystallon is available only when a test starts the fake services
+    environment("GLUONIFY_HOME", layout.buildDirectory.dir("gluonify-home").get().asFile.path)
 }
