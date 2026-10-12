@@ -3,6 +3,7 @@
 Variante Gradle (Kotlin DSL) de `gluonify-source` : même service, même code, même tests. Garder les deux dépôts en phase quand le code partagé change.
 
 ## Pas encore fait
+- [x] **Base gDown dédiée sans déclaration** (2026-10-12, branche `gdown-infer`, comme `gluonify-source`) : `source.store=auto` (défaut) donne `gdown` quand `GLUONIFY_GDOWN_DATABASE` est fourni, `memory` sinon ; Bup déduit `gdownDatabase: true` des références de `application.properties` ; `NoteStoresTest` ; README en cinq langues. 70 tests Java.
 - [x] **Vraie connexion dans l'interface** (2026-10-12, branche `login`, comme `gluonify-source`) : connexion par la page de Charm (code d'autorisation + PKCE, `createAuth` du kit `@gluonify/ui` embarqué dans `src/main/webui/vendor/gluonify-ui`), `GET /api/auth-config` (`AuthConfigResource`, `source.auth.*`), champ de jeton collé supprimé, notes, documents et plateforme cachés sans connexion, README (§6) en cinq langues, CLAUDE.md. 67 tests Java et 40 tests d'interface des deux côtés.
 - [ ] Vérifier périodiquement que ce dépôt reste synchronisé avec `gluonify-source` (aucune automatisation de synchronisation pour l'instant : copie manuelle).
 - [x] Le README de `gluonify-source` renvoie vers cette variante (citation en tête des cinq README, 2026-10-08).
