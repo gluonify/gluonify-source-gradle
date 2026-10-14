@@ -3,6 +3,7 @@
 Variante Gradle (Kotlin DSL) de `gluonify-source` : même service, même code, même tests. Garder les deux dépôts en phase quand le code partagé change.
 
 ## Pas encore fait
+- Fait le 2026-10-14 : Swagger UI en lecture seule en production (ni « Authorize » ni « Try it out », requêtes refusées sauf le contrat ; `SwaggerReadOnlyConfigTest`).
 - [x] **Kit `@gluonify/ui` 0.4.0** (2026-10-14) : copie embarquée rafraîchie (`sync-vendor.sh`) ; `GxLoginPage` n'a plus de champ de jeton collé (connexion par Charm seulement, OIDC + PKCE). L'interface n'avait déjà aucun chemin de jeton collé (test « no pasted token, no password field » de `App.test.js`) ; identité `dev` limitée au profil `dev` (`@IfBuildProfile`). 40 tests d'interface.
 - [x] **Base gDown dédiée sans déclaration** (2026-10-12, branche `gdown-infer`, comme `gluonify-source`) : `source.store=auto` (défaut) donne `gdown` quand `GLUONIFY_GDOWN_DATABASE` est fourni, `memory` sinon ; Bup déduit `gdownDatabase: true` des références de `application.properties` ; `NoteStoresTest` ; README en cinq langues. 70 tests Java.
 - [x] **Connexion sans configuration sur la plateforme** (2026-10-12, branche `app-sso`) : `GLUONIFY_OIDC_CLIENT_ID`, `GLUONIFY_OIDC_ISSUER`, `GLUONIFY_OIDC_PUBLIC_URL`, `GLUONIFY_OIDC_AUDIENCE` (injectées par Higgs, client `app-<nom>`) sont les valeurs par défaut ; `GLUONIFY_SOURCE_OIDC_*` et `GLUONIFY_SOURCE_CHARM_PUBLIC_URL` l'emportent ; `AuthConfigPlatformTest`, `AuthConfigOverrideTest` ; README en cinq langues. Reste : un build Bup sur le cluster de dev qui montre « Sign in ».
