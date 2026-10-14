@@ -3,11 +3,9 @@
 Variante Gradle (Kotlin DSL) de `gluonify-source` : même service, même code, même tests. Garder les deux dépôts en phase quand le code partagé change.
 
 ## Pas encore fait
-<<<<<<< HEAD
+- [x] **Kit `@gluonify/ui` 0.4.0** (2026-10-14) : copie embarquée rafraîchie (`sync-vendor.sh`) ; `GxLoginPage` n'a plus de champ de jeton collé (connexion par Charm seulement, OIDC + PKCE). L'interface n'avait déjà aucun chemin de jeton collé (test « no pasted token, no password field » de `App.test.js`) ; identité `dev` limitée au profil `dev` (`@IfBuildProfile`). 40 tests d'interface.
 - [x] **Base gDown dédiée sans déclaration** (2026-10-12, branche `gdown-infer`, comme `gluonify-source`) : `source.store=auto` (défaut) donne `gdown` quand `GLUONIFY_GDOWN_DATABASE` est fourni, `memory` sinon ; Bup déduit `gdownDatabase: true` des références de `application.properties` ; `NoteStoresTest` ; README en cinq langues. 70 tests Java.
-=======
 - [x] **Connexion sans configuration sur la plateforme** (2026-10-12, branche `app-sso`) : `GLUONIFY_OIDC_CLIENT_ID`, `GLUONIFY_OIDC_ISSUER`, `GLUONIFY_OIDC_PUBLIC_URL`, `GLUONIFY_OIDC_AUDIENCE` (injectées par Higgs, client `app-<nom>`) sont les valeurs par défaut ; `GLUONIFY_SOURCE_OIDC_*` et `GLUONIFY_SOURCE_CHARM_PUBLIC_URL` l'emportent ; `AuthConfigPlatformTest`, `AuthConfigOverrideTest` ; README en cinq langues. Reste : un build Bup sur le cluster de dev qui montre « Sign in ».
->>>>>>> 491f85c (Sign-in with no configuration on the platform: GLUONIFY_OIDC_* defaults, GLUONIFY_SOURCE_OIDC_* overrides)
 - [x] **Vraie connexion dans l'interface** (2026-10-12, branche `login`, comme `gluonify-source`) : connexion par la page de Charm (code d'autorisation + PKCE, `createAuth` du kit `@gluonify/ui` embarqué dans `src/main/webui/vendor/gluonify-ui`), `GET /api/auth-config` (`AuthConfigResource`, `source.auth.*`), champ de jeton collé supprimé, notes, documents et plateforme cachés sans connexion, README (§6) en cinq langues, CLAUDE.md. 67 tests Java et 40 tests d'interface des deux côtés.
 - [ ] Vérifier périodiquement que ce dépôt reste synchronisé avec `gluonify-source` (aucune automatisation de synchronisation pour l'instant : copie manuelle).
 - [x] Le README de `gluonify-source` renvoie vers cette variante (citation en tête des cinq README, 2026-10-08).
