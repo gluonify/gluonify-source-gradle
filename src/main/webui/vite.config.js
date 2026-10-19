@@ -6,5 +6,7 @@ export default defineConfig({
   plugins: [vue()],
   base: './',
   build: { outDir: 'dist', emptyOutDir: true },
-  test: { environment: 'jsdom', include: ['src/**/*.test.js'] }
+  test: {
+    coverage: { provider: 'v8', include: ['src/**/*.{js,ts,vue}'], exclude: ['src/**/*.test.{js,ts}', 'src/test-setup.{js,ts}'], thresholds: { lines: 96, branches: 80 } }, // ratchet (gluonify-plasma README, "Quality gates"): current level rounded down, never lowered
+    environment: 'jsdom', include: ['src/**/*.test.js'] }
 })

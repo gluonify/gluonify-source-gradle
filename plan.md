@@ -1,5 +1,8 @@
 # plan.md: gluonify-source-gradle
 
+## Done recently
+- [x] **Interface quality gates** (2026-10-19): `npm test` runs ESLint (sonarjs, typescript-eslint strict; 4 suppressed existing violations) and Vitest coverage thresholds (lines 96 %, branches 80 %). **Left**: empty `eslint-suppressions.json`, coverage to 95 %.
+
 Gradle (Kotlin DSL) variant of `gluonify-source`: same service, same code, same tests. Keep the two repositories in step when the shared code changes.
 
 ## Not done yet

@@ -41,6 +41,8 @@ cd gluonify-source
 ./gradlew quarkusDev
 ```
 
+**Interface quality gates** (since 2026-10-19, [gluonify-plasma README, "Quality gates"](https://github.com/gluonify/gluonify-plasma#quality-gates)): `npm test` in `src/main/webui` runs ESLint 9 (`eslint.config.js`: typescript-eslint strict, eslint-plugin-vue, eslint-plugin-sonarjs) then Vitest with v8 coverage; it fails on a lint error not in `eslint-suppressions.json` (existing debt of 2026-10-19: 4; the file only shrinks, `npx eslint . --prune-suppressions` removes what is paid) or when the coverage falls below the thresholds of the Vite configuration (lines 96 %, branches 80 %, raised as tests are added, never lowered).
+
 Open <http://localhost:8080>: the interface (add, list, delete notes). Also:
 
 | Address | Content |
