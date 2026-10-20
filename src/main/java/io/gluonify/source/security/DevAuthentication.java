@@ -16,7 +16,7 @@ import jakarta.enterprise.inject.Alternative;
 import java.util.Set;
 
 /**
- * DEVELOPMENT identity: under {@code ./gradlew quarkusDev} only, every request is "dev" with the read and write roles, to try the API and the UI
+ * DEVELOPMENT identity: under {@code mvn quarkus:dev} only, every request is "dev" with the read and write roles, to try the API and the UI
  * without an identity server.
  *
  * <p><b>Security: {@code @IfBuildProfile("dev")}</b>: this bean is compiled ONLY in the development profile. It does not exist in the production executable (neither native nor JVM):
@@ -28,12 +28,12 @@ import java.util.Set;
 @IfBuildProfile("dev")
 public class DevAuthentication implements HttpAuthenticationMechanism {
     @Override
-    public Uni<SecurityIdentity> authenticate(RoutingContext context, IdentityProviderManager identityProviderManager) {
+    public Uni<SecurityIdentity> authenticate(final RoutingContext context, final IdentityProviderManager identityProviderManager) {
         return Uni.createFrom().item(QuarkusSecurityIdentity.builder().setPrincipal(new QuarkusPrincipal("dev")).addRoles(Set.of("source:read", "source:write")).build());
     }
 
     @Override
-    public Uni<ChallengeData> getChallenge(RoutingContext context) {
+    public Uni<ChallengeData> getChallenge(final RoutingContext context) {
         return Uni.createFrom().nullItem();
     }
 

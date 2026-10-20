@@ -1,6 +1,6 @@
 package io.gluonify.source.notes;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Singleton;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
@@ -11,10 +11,15 @@ import org.eclipse.microprofile.health.Readiness;
  * (/q/health/live depends on nothing external: a Gdown outage must not make the application restart in a loop.)
  */
 @Readiness
-@ApplicationScoped
+// @Singleton, not @ApplicationScoped: Quarkus rewrites @ApplicationScoped classes with constructor injection, which makes JaCoCo lose their coverage.
+@Singleton
 public class StoreHealth implements HealthCheck {
+    private final NoteStore store;
+
     @Inject
-    NoteStore store;
+    public StoreHealth(final NoteStore store) {
+        this.store = store;
+    }
 
     @Override
     public HealthCheckResponse call() {

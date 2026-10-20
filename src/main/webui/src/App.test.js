@@ -6,13 +6,13 @@ import App from './App.vue'
 import { LANGUAGES, setLanguage, detectLanguage } from './i18n/index.js'
 import { SAMPLE_INVOICE } from './api.js'
 import { auth, browser } from './auth.js'
-import en from './i18n/en.js'
-import fr from './i18n/fr.js'
-import es from './i18n/es.js'
-import it_ from './i18n/it.js'
-import de from './i18n/de.js'
+import en from './i18n/en.json'
+import fr from './i18n/fr.json'
+import es from './i18n/es.json'
+import it_ from './i18n/it.json'
+import de from './i18n/de.json'
 
-// UI tests ("./gradlew build" runs them through Quinoa): fetch is replaced, no server is needed.
+// UI tests ("mvn package" runs them through Quinoa): fetch is replaced, no server is needed.
 // Sign-in configuration served by GET /api/auth-config on the platform (Charm client of this UI); every test is signed in unless it says otherwise.
 const CHARM = { signInRequired: true, clientId: 'source-ui', authorizationUrl: 'https://gluonify.lan/authorize', tokenUrl: 'https://gluonify.lan/token', logoutUrl: 'https://gluonify.lan/logout', scope: 'openid profile' }
 function mockApi(routes) {
@@ -315,8 +315,8 @@ describe('sign-in with Charm (authorization code + PKCE)', () => {
     const w = mount(App)
     await flushPromises()
     await w.find('.signin button').trigger('click')
-    await flushPromises()
-    expect(loc.assign).toHaveBeenCalledTimes(1)
+    // the login URL needs the S256 challenge (crypto.subtle, asynchronous): wait for the redirect rather than one microtask flush (flaky on slower hosts)
+    await vi.waitFor(() => expect(loc.assign).toHaveBeenCalledTimes(1))
     const u = new URL(loc.assign.mock.calls[0][0])
     expect(u.origin + u.pathname).toBe('https://gluonify.lan/authorize')
     expect(u.searchParams.get('client_id')).toBe('source-ui')
@@ -354,7 +354,7 @@ describe('sign-in with Charm (authorization code + PKCE)', () => {
     expect(auth.token.value).toBe('')
     expect(w.text()).not.toContain('First')
     expect(w.find('.signin button').text()).toBe('Sign in again') // right after a sign-out: no automatic redirect, the person chooses
-    expect(w.find('.signin [role=status]').text()).toBe('You are signed out.')
+    expect(w.find('.signin output').text()).toBe('You are signed out.')
     const out = new URL(loc.assign.mock.calls.at(-1)[0])
     expect(out.origin + out.pathname).toBe('https://gluonify.lan/logout')
     expect(out.searchParams.get('id_token_hint')).toBe('id.t.k')

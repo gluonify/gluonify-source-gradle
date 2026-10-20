@@ -8,7 +8,7 @@ Shared context for every gluonify-* repository (rules, build order, pitfalls, co
 
 ## Commands
 - `./gradlew quarkusDev`: development (hot reload, UI at http://localhost:8080, **no token needed**: the "dev" identity exists only in this profile).
-- `./gradlew test`: 67 Java tests (REST, stores, webhooks, platform, documents, sign-in configuration, conformity). The UI is tested separately: `cd src/main/webui && npm test` (40 tests).
+- `./gradlew test`: 113 Java tests (REST, stores, webhooks, platform, documents, sign-in configuration, conformity). The UI is tested separately: `cd src/main/webui && npm test` (55 tests).
 - The Gluonify SDK (`gluonify-plasma-quarkus`, test scope `gluonify-plasma-testing`; `gluonifySdkVersion` is `0.7.2`, published on sea; no `mavenLocal()`; since 0.7.1 its client modules carry the markers `META-INF/gluonify/services/<service>` from which Bup infers `uses`, reading the `runtimeClasspath`) comes from the Maven repository of gluonify-sea (Gradle property `gluonify.sea.maven.url` in `gradle.properties`, default `https://images.gluonify.io/maven`; the SDK version is `gluonifySdkVersion`, same file); to build against another copy: `./gradlew test -Pgluonify.sea.maven.url=file:///path/to/repository`.
 - Native (what Gluonify runs): `docker build --target out --output type=local,dest=dist -f Dockerfile.build .` -> `dist/gluonify-source`.
 - Rename the project: `python3 scripts/rename.py <groupId> <artifactId> [<package>]`, then `./gradlew test`.

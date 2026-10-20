@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("io.quarkus")
 }
 
@@ -67,3 +68,23 @@ tasks.test {
     // Tests never depend on the machine: no cluster known (an empty folder instead of ~/.gluonify), so Crystallon is available only when a test starts the fake services
     environment("GLUONIFY_HOME", layout.buildDirectory.dir("gluonify-home").get().asFile.path)
 }
+
+// Coverage ratchet (same level as the Maven variant): `./gradlew check` fails like a red test below 100 % of lines and branches.
+jacoco { toolVersion = "0.8.14" }
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports { xml.required = true }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+    violationRules {
+        rule {
+            limit { counter = "LINE"; value = "COVEREDRATIO"; minimum = "1.00".toBigDecimal() }
+            limit { counter = "BRANCH"; value = "COVEREDRATIO"; minimum = "1.00".toBigDecimal() }
+        }
+    }
+}
+
+tasks.check { dependsOn(tasks.jacocoTestReport, tasks.jacocoTestCoverageVerification) }
