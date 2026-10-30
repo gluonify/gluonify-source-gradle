@@ -10,7 +10,7 @@ This repository is the **starting point** for a Quarkus 4 service that runs on G
 - The Gluonify SDK (`gluonify-plasma-quarkus`, test scope `gluonify-plasma-testing`; `gluonifySdkVersion` is `0.7.2`, published on sea; no `mavenLocal()`; since 0.7.1 its client modules carry the markers `META-INF/gluonify/services/<service>` from which Bup infers `uses`, reading the `runtimeClasspath`) comes from the Maven repository of gluonify-sea (Gradle property `gluonify.sea.maven.url` in `gradle.properties`, default `https://images.gluonify.io/maven`; the SDK version is `gluonifySdkVersion`, same file); to build against another copy: `./gradlew test -Pgluonify.sea.maven.url=file:///path/to/repository`.
 - Native (what Gluonify runs): `docker build --target out --output type=local,dest=dist -f Dockerfile.build .` -> `dist/gluonify-source`.
 - Rename the project: `python3 scripts/rename.py <groupId> <artifactId> [<package>]`, then `./gradlew test`.
-- Java 25, Quarkus 4.0.0.Beta1, Jackson 3 (`tools.jackson.databind`, not `com.fasterxml`), GraalVM native (Mandrel 25).
+- Java 25, Quarkus 4.0.0.Beta2, Jackson 3 (`tools.jackson.databind`, not `com.fasterxml`), GraalVM native (Mandrel 25).
 
 ## Platform rules (Gluonify's builder enforces them; `ConformityTest` checks them on your side)
 - `quarkus-smallrye-health` is mandatory (R-SANTE). No plaintext secret in `application.properties`: use `${VARIABLE}` or `${app.key}` (R-SECRET). No `.env`, `*.pem`, `*.p12`, `*.jks` (R-FICHIER-SENSIBLE). No `quarkus-container-image-*` (R-IMAGE). `quarkus.http.host` never on loopback (R-ECOUTE). Native compilation never disabled (R-NATIF).

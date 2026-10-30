@@ -63,7 +63,7 @@ curl -s localhost:8080/api/notes
 ## 2. Die Projektübersicht
 
 ```
-build.gradle.kts                EIGENSTÄNDIGES Gradle-Projekt (Quarkus 4.0.0.Beta1, Java 25): kein Gluonify-Parent
+build.gradle.kts                EIGENSTÄNDIGES Gradle-Projekt (Quarkus 4.0.0.Beta2, Java 25): kein Gluonify-Parent
 settings.gradle.kts             Projektname (rootProject.name): auch der Basisname der ausführbaren Datei
 gradle.properties               Versionen (Quarkus, Quinoa, Gluonify-SDK), Adresse des SDK-Repositorys und die von Gluonify vorgegebenen nativen Argumente
 gradlew, gradle/wrapper/        der Gradle-Wrapper: nichts zu installieren
