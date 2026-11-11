@@ -30,7 +30,20 @@
     "vitest": "^5.0.5"
   },
   "overrides": {
-    "minimatch@^10": "^11.0.1",
-    "glob@^13": "^14.0.2"
+    "eslint-plugin-sonarjs": {
+      "minimatch": "^11.0.1",
+      "eslint": {
+        "minimatch": "^3.1.5"
+      }
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    },
+    "js-beautify": {
+      "glob": "^14.0.2",
+      "editorconfig": {
+        "minimatch": "^11.0.1"
+      }
+    }
   }
 }
