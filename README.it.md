@@ -99,7 +99,7 @@ src/main/java/io/gluonify/source/
 src/main/webui/                 l'interfaccia Vue 3 (Vite + vitest), compilata da Quinoa
   src/auth.js                   accesso con Charm (codice di autorizzazione + PKCE) tramite il kit @gluonify/ui
   vendor/gluonify-ui/           copia inclusa del kit (gluonify-ui/scripts/sync-vendor.sh, mai modificata a mano)
-src/test/java/…                 70 test Java; src/main/webui/src/App.test.js: 40 test di interfaccia
+src/test/java/…                 121 test Java; src/main/webui/src/App.test.js: 40 test di interfaccia
 deploy/                         esempi: AppSpec, dominio, webhook Photon, database Gdown
 scripts/rename.py               rinomina il progetto
 ```
@@ -288,7 +288,7 @@ dependencies {
 }
 ```
 
-L'SDK è servito dal repository Maven di **gluonify-sea** (lettura pubblica: nessun account per risolverlo), aggiunto a Maven Central, non al suo posto; questo `build.gradle.kts` legge il suo indirizzo dalla proprietà Gradle `gluonify.sea.maven.url` (valore predefinito in `gradle.properties`, accanto a `gluonifySdkVersion`), così che uno specchio o una copia locale possa sostituirlo (`./gradlew test -Pgluonify.sea.maven.url=file:///…`). Il builder di Gluonify (Bup) dichiara da solo questo repository per i build che esegue. **Versione**: l'SDK è pubblicato nella versione 0.7.2 su gluonify-sea, con `gluonify-plasma-quarkus` e `gluonify-plasma-testing`; `gluonifySdkVersion` vale `0.7.2` in `gradle.properties`, nulla da installare in locale (nessun `mavenLocal()`). Dalla 0.7.1, ogni modulo client porta un marcatore (`META-INF/gluonify/services/crystallon` in `gluonify-plasma-crystallon-client`) da cui il builder deduce `uses` (legge il `runtimeClasspath`). I due artefatti sono `implementation` e `testImplementation`. Con Maven: le stesse due `<dependency>` in `pom.xml`.
+L'SDK è servito dal repository Maven di **gluonify-sea** (lettura pubblica: nessun account per risolverlo), aggiunto a Maven Central, non al suo posto; questo `build.gradle.kts` legge il suo indirizzo dalla proprietà Gradle `gluonify.sea.maven.url` (valore predefinito in `gradle.properties`, accanto a `gluonifySdkVersion`), così che uno specchio o una copia locale possa sostituirlo (`./gradlew test -Pgluonify.sea.maven.url=file:///…`). Il builder di Gluonify (Bup) dichiara da solo questo repository per i build che esegue. **Versione**: l'SDK è pubblicato nella versione 0.7.4 su gluonify-sea, con `gluonify-plasma-quarkus` e `gluonify-plasma-testing`; `gluonifySdkVersion` vale `0.7.4` in `gradle.properties`, nulla da installare in locale (nessun `mavenLocal()`). Dalla 0.7.1, ogni modulo client porta un marcatore (`META-INF/gluonify/services/crystallon` in `gluonify-plasma-crystallon-client`) da cui il builder deduce `uses` (legge il `runtimeClasspath`). I due artefatti sono `implementation` e `testImplementation`. Con Maven: le stesse due `<dependency>` in `pom.xml`.
 
 **2. Nulla da dichiarare.** Costruita da Bup, l'applicazione riceve `?crystallon` nei suoi `uses` senza scriverlo: Bup legge il marcatore di `gluonify-plasma-crystallon-client` nel classpath di esecuzione (SDK 0.7.1 e successivi) e aggiunge il servizio come facoltativo; [`gluonify.json`](gluonify.json) non lo menziona. Distribuita a mano (`PUT /apps`: nessun build, quindi nessuna deduzione), la specifica lo dichiara: `crystallon` negli `uses` di [`deploy/appspec.json`](deploy/appspec.json). In entrambi i casi la piattaforma **apre la rete** verso Crystallon, e solo verso di esso, e fornisce il suo indirizzo e il token proprio dell'applicazione. **In questo repository non ci sono proprietà, URL né token**: il produttore di `gluonify-plasma-quarkus` dà al codice un `CrystallonClient` (il mapper Jackson 3 dell'applicazione, l'indirizzo e il token trovati dall'SDK). [`Documents`](src/main/java/io/gluonify/source/documents/Documents.java) chiede soltanto se Crystallon è disponibile (`GluonifyServices.optional("crystallon")`) e inietta il client come `Instance<CrystallonClient>`. **Senza di esso la funzione è spenta e nient'altro cambia**: l'endpoint risponde 404 e dice perché, `GET /api/platform` indica `"documents": false`, l'interfaccia nasconde la sezione, l'applicazione si avvia e tutti gli altri test passano senza Crystallon. Il luogo in cui gira l'applicazione decide come l'SDK trova Crystallon:
 
@@ -368,7 +368,7 @@ La dichiari in `"uses"`: la piattaforma fornisce `GLUONIFY_SERVICE_<APP>_URL` **
 ## 8. Compilare
 
 ```bash
-./gradlew test                       # test Java (70)
+./gradlew test                       # test Java (121)
 ./gradlew build                    # JVM: build/quarkus-app/; compila anche l'interfaccia (Quinoa)
 ```
 
@@ -429,7 +429,7 @@ Aggiornare: stesso `PUT` (o nuovo build); le repliche vengono sostituite **una a
 ## 10. Testare
 
 ```bash
-./gradlew test                                 # 70 test Java
+./gradlew test                                 # 121 test Java
 cd src/main/webui && npm install && npm test   # 40 test di interfaccia
 ```
 
@@ -450,6 +450,7 @@ cd src/main/webui && npm install && npm test   # 40 test di interfaccia
 | `DocumentsReflectionTest` | 1 | salvaguardia nativa: ogni record dei dati generati è dichiarato per la reflection |
 | `CrystallonTemplateFileTest` | 1 | il modello Crystallon del repository (`crystallon/templates/gluonify-invoice.json`): JSON valido, il nome esatto che chiama il codice generato, gli stessi campi di primo livello dei dati generati (l'impronta `SCHEMA_SHA256` è calcolata solo da Crystallon) |
 | `DeploySpecsTest` | 2 | le specifiche di `deploy/` usano i nomi attuali (`uses`, `SOURCE_STORE`); `gluonify.json` (letto dal builder) dichiara solo ciò che l'SDK non rileva (`charm`, `gdown`) e, con `crystallon` dedotto (marcatore nel classpath), dà gli stessi `uses` di `deploy/appspec.json` |
+| `UsageContractTest` | 8 | `GET /q/usage` (`gluonify-usage/1`): i cinque controlli comuni dell'SDK (forma, 401 senza token, 403 senza il ruolo, nessun segreto, no-store), poi il ruolo del prodotto `gluonify:source:usage:read`, il ruolo comune `gluonify:usage:read`, `attribution: none` |
 
 Un test d'API si copia da `NotesResourceTest`; un test di archiviazione da `FileNoteStoreTest` (senza avviare Quarkus: veloce).
 

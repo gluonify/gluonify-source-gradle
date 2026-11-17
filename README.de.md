@@ -99,7 +99,7 @@ src/main/java/io/gluonify/source/
 src/main/webui/                 die Vue-3-Oberfläche (Vite + vitest), von Quinoa gebaut
   src/auth.js                   Anmeldung bei Charm (Autorisierungscode + PKCE) über das Kit @gluonify/ui
   vendor/gluonify-ui/           eingebettete Kopie des Kits (gluonify-ui/scripts/sync-vendor.sh, nie von Hand bearbeitet)
-src/test/java/…                 70 Java-Tests; src/main/webui/src/App.test.js: 40 Oberflächentests
+src/test/java/…                 121 Java-Tests; src/main/webui/src/App.test.js: 40 Oberflächentests
 deploy/                         Beispiele: AppSpec, Domain, Photon-Webhook, Gdown-Datenbank
 scripts/rename.py               benennt das Projekt um
 ```
@@ -288,7 +288,7 @@ dependencies {
 }
 ```
 
-Das SDK wird vom Maven-Repository von **gluonify-sea** geliefert (öffentlich lesbar: kein Konto zum Auflösen), zu Maven Central hinzugefügt, nicht an dessen Stelle; diese `build.gradle.kts` liest die Adresse aus der Gradle-Eigenschaft `gluonify.sea.maven.url` (Standardwert in `gradle.properties`, neben `gluonifySdkVersion`), damit ein Mirror oder eine lokale Kopie sie ersetzen kann (`./gradlew test -Pgluonify.sea.maven.url=file:///…`). Der Builder von Gluonify (Bup) deklariert dieses Repository für die Builds, die er ausführt, selbst. **Version**: Das SDK ist in Version 0.7.2 auf gluonify-sea veröffentlicht, mit `gluonify-plasma-quarkus` und `gluonify-plasma-testing`; `gluonifySdkVersion` ist `0.7.2` in `gradle.properties`, lokal muss nichts installiert werden (kein `mavenLocal()`). Seit 0.7.1 trägt jedes Client-Modul eine Markierung (`META-INF/gluonify/services/crystallon` in `gluonify-plasma-crystallon-client`), aus der der Builder `uses` ableitet (er liest den `runtimeClasspath`). Die beiden Artefakte sind `implementation` und `testImplementation`. Mit Maven: dieselben zwei `<dependency>` in `pom.xml`.
+Das SDK wird vom Maven-Repository von **gluonify-sea** geliefert (öffentlich lesbar: kein Konto zum Auflösen), zu Maven Central hinzugefügt, nicht an dessen Stelle; diese `build.gradle.kts` liest die Adresse aus der Gradle-Eigenschaft `gluonify.sea.maven.url` (Standardwert in `gradle.properties`, neben `gluonifySdkVersion`), damit ein Mirror oder eine lokale Kopie sie ersetzen kann (`./gradlew test -Pgluonify.sea.maven.url=file:///…`). Der Builder von Gluonify (Bup) deklariert dieses Repository für die Builds, die er ausführt, selbst. **Version**: Das SDK ist in Version 0.7.4 auf gluonify-sea veröffentlicht, mit `gluonify-plasma-quarkus` und `gluonify-plasma-testing`; `gluonifySdkVersion` ist `0.7.4` in `gradle.properties`, lokal muss nichts installiert werden (kein `mavenLocal()`). Seit 0.7.1 trägt jedes Client-Modul eine Markierung (`META-INF/gluonify/services/crystallon` in `gluonify-plasma-crystallon-client`), aus der der Builder `uses` ableitet (er liest den `runtimeClasspath`). Die beiden Artefakte sind `implementation` und `testImplementation`. Mit Maven: dieselben zwei `<dependency>` in `pom.xml`.
 
 **2. Nichts zu deklarieren.** Von Bup gebaut, erhält die Anwendung `?crystallon` in ihren `uses`, ohne es zu schreiben: Bup liest die Markierung von `gluonify-plasma-crystallon-client` im Laufzeit-Classpath (SDK 0.7.1 und neuer) und fügt den Dienst als optional hinzu; [`gluonify.json`](gluonify.json) erwähnt ihn nicht. Von Hand deployt (`PUT /apps`: kein Build, also keine Ableitung), deklariert ihn die Spezifikation: `crystallon` in den `uses` von [`deploy/appspec.json`](deploy/appspec.json). In beiden Fällen gilt: Die Plattform **öffnet das Netz** zu Crystallon, und nur zu ihm, und liefert seine Adresse und das eigene Token der Anwendung. **In diesem Repository gibt es weder Eigenschaft noch URL noch Token**: Der Producer von `gluonify-plasma-quarkus` gibt dem Code einen `CrystallonClient` (der Jackson-3-Mapper der Anwendung, Adresse und Token vom SDK gefunden). [`Documents`](src/main/java/io/gluonify/source/documents/Documents.java) fragt nur, ob Crystallon verfügbar ist (`GluonifyServices.optional("crystallon")`), und injiziert den Client als `Instance<CrystallonClient>`. **Ohne das ist die Funktion aus und sonst ändert sich nichts**: Der Endpunkt antwortet 404 und sagt warum, `GET /api/platform` meldet `"documents": false`, die Oberfläche blendet den Abschnitt aus, die Anwendung startet und alle anderen Tests laufen ohne Crystallon. Wo die Anwendung läuft, entscheidet, wie das SDK Crystallon findet:
 
@@ -368,7 +368,7 @@ Deklarieren Sie sie in `"uses"`: Die Plattform stellt `GLUONIFY_SERVICE_<APP>_UR
 ## 8. Bauen
 
 ```bash
-./gradlew test                       # Java-Tests (70)
+./gradlew test                       # Java-Tests (121)
 ./gradlew build                    # JVM: build/quarkus-app/; baut auch die Oberfläche (Quinoa)
 ```
 
@@ -429,7 +429,7 @@ Aktualisieren: dasselbe `PUT` (oder ein neuer Build); die Replikate werden **nac
 ## 10. Testen
 
 ```bash
-./gradlew test                                 # 70 Java-Tests
+./gradlew test                                 # 121 Java-Tests
 cd src/main/webui && npm install && npm test   # 40 Oberflächentests
 ```
 
@@ -450,6 +450,7 @@ cd src/main/webui && npm install && npm test   # 40 Oberflächentests
 | `DocumentsReflectionTest` | 1 | Schutz für Native: jeder Record der generierten Daten ist für die Reflection registriert |
 | `CrystallonTemplateFileTest` | 1 | die Crystallon-Vorlage des Repositorys (`crystallon/templates/gluonify-invoice.json`): gültiges JSON, der genaue Name, den der generierte Code aufruft, dieselben Felder der obersten Ebene wie die generierten Daten (den Fingerabdruck `SCHEMA_SHA256` berechnet nur Crystallon) |
 | `DeploySpecsTest` | 2 | die Spezifikationen in `deploy/` verwenden die aktuellen Namen (`uses`, `SOURCE_STORE`); `gluonify.json` (vom Builder gelesen) deklariert nur, was das SDK nicht erkennt (`charm`, `gdown`), und ergibt mit dem abgeleiteten `crystallon` (Markierung im Classpath) dasselbe `uses` wie `deploy/appspec.json` |
+| `UsageContractTest` | 8 | `GET /q/usage` (`gluonify-usage/1`): die fünf gemeinsamen Prüfungen des SDK (Form, 401 ohne Token, 403 ohne die Rolle, kein Geheimnis, no-store), dann die Produktrolle `gluonify:source:usage:read`, die gemeinsame Rolle `gluonify:usage:read`, `attribution: none` |
 
 Ein API-Test wird von `NotesResourceTest` kopiert; ein Speichertest von `FileNoteStoreTest` (ohne Quarkus zu starten: schnell).
 

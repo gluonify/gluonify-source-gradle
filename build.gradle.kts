@@ -49,6 +49,8 @@ dependencies {
 
     // Fake Gluonify services for tests (GluonifyTestServices.start() / close()): a fake Crystallon, nothing to configure
     testImplementation("io.gluonify.plasma:gluonify-plasma-testing:$gluonifySdkVersion")
+    // SDK test kit of the usage contract (UsageContractTests, the SDK's test jar)
+    testImplementation("io.gluonify.plasma:gluonify-plasma-sdk:$gluonifySdkVersion:tests")
     testImplementation("io.quarkus:quarkus-junit")
     testImplementation("io.quarkus:quarkus-test-security")
     testImplementation("io.rest-assured:rest-assured")
