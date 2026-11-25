@@ -99,7 +99,7 @@ src/main/java/io/gluonify/source/
 src/main/webui/                 l'interface Vue 3 (Vite + vitest), construite par Quinoa
   src/auth.js                   connexion avec Charm (code d'autorisation + PKCE) par le kit @gluonify/ui
   vendor/gluonify-ui/           copie embarquée du kit (gluonify-ui/scripts/sync-vendor.sh, jamais modifiée à la main)
-src/test/java/…                 121 tests Java ; src/main/webui/src/App.test.js : 40 tests d'interface
+src/test/java/…                 125 tests Java ; src/main/webui/src/App.test.js : 40 tests d'interface
 deploy/                         exemples : AppSpec, domaine, webhook Photon, base Gdown
 scripts/rename.py               renomme le projet
 ```
@@ -170,6 +170,8 @@ Le service ne **crée** jamais de jeton : il en **vérifie** (mode `quarkus.oidc
 | Audience (`aud`) | `quarkus.oidc.token.audience` | `GLUONIFY_SOURCE_OIDC_AUDIENCE`, par défaut le nom du projet (`gluonify-source`) |
 | Expiration | automatique | jetons courts |
 | Rôles | claim `roles` | `source:read` (lire), `source:write` (écrire) : voir `@RolesAllowed` ; le préfixe `gluonify:` est réservé à la plateforme (Charm le refuse pour les rôles d’une application) |
+
+**Charm sur le TLS interne de la plateforme** : quand l'adresse de service de Charm (`GLUONIFY_SERVICE_CHARM_URL`) est en `https://`, son certificat est signé par l'autorité interne du cluster, que le JDK ne connaît pas. Rien à configurer : la plateforme donne cette autorité à chaque instance sous forme de fichier (`GLUONIFY_CA_FILE`), et le SDK (`gluonify-plasma-quarkus` 0.7.5 ou plus, par `gluonify-plasma-quarkus-tls`) en définit la configuration TLS `gluonify-root` et y rattache le tenant OIDC dont `quarkus.oidc.auth-server-url` est l'adresse de service de Charm (`quarkus.oidc.tls.tls-configuration-name=gluonify-root`, sauf si vous fixez la vôtre). Seul ce tenant fait confiance à la racine interne ; tout autre serveur garde les autorités du JDK. Sans le fichier, ou avec Charm en `http://` simple, rien ne change (`InternalRootTrustTest`).
 
 **Obtenir un jeton de test** (l'administrateur de la plateforme, avec le jeton d'administration de Charm) :
 
@@ -288,7 +290,7 @@ dependencies {
 }
 ```
 
-Le SDK est servi par le dépôt Maven de **gluonify-sea** (lecture publique : aucun compte pour le résoudre), ajouté à Maven Central, pas à sa place ; ce `build.gradle.kts` lit son adresse dans la propriété Gradle `gluonify.sea.maven.url` (défaut dans `gradle.properties`, à côté de `gluonifySdkVersion`), pour qu'un miroir ou une copie locale puisse la remplacer (`./gradlew test -Pgluonify.sea.maven.url=file:///…`). Le builder de Gluonify (Bup) déclare lui-même ce dépôt pour les builds qu'il exécute. **Version** : le SDK est publié en 0.7.4 sur gluonify-sea, avec `gluonify-plasma-quarkus` et `gluonify-plasma-testing` ; `gluonifySdkVersion` vaut `0.7.4` dans `gradle.properties`, rien à installer en local (pas de `mavenLocal()`). Depuis la 0.7.1, chaque module client porte un marqueur (`META-INF/gluonify/services/crystallon` dans `gluonify-plasma-crystallon-client`) dont le builder déduit `uses` (il lit le `runtimeClasspath`). Les deux artefacts sont `implementation` et `testImplementation`. Avec Maven : les deux mêmes `<dependency>` dans `pom.xml`.
+Le SDK est servi par le dépôt Maven de **gluonify-sea** (lecture publique : aucun compte pour le résoudre), ajouté à Maven Central, pas à sa place ; ce `build.gradle.kts` lit son adresse dans la propriété Gradle `gluonify.sea.maven.url` (défaut dans `gradle.properties`, à côté de `gluonifySdkVersion`), pour qu'un miroir ou une copie locale puisse la remplacer (`./gradlew test -Pgluonify.sea.maven.url=file:///…`). Le builder de Gluonify (Bup) déclare lui-même ce dépôt pour les builds qu'il exécute. **Version** : le SDK est publié en 0.7.5 sur gluonify-sea, avec `gluonify-plasma-quarkus` et `gluonify-plasma-testing` ; `gluonifySdkVersion` vaut `0.7.5` dans `gradle.properties` (0.7.4 ou plus : `GET /q/usage` ; 0.7.5 ou plus : `gluonify-plasma-quarkus-tls`, le tenant OIDC fait confiance au TLS interne de Charm, §6), rien à installer en local (pas de `mavenLocal()`). Depuis la 0.7.1, chaque module client porte un marqueur (`META-INF/gluonify/services/crystallon` dans `gluonify-plasma-crystallon-client`) dont le builder déduit `uses` (il lit le `runtimeClasspath`). Les deux artefacts sont `implementation` et `testImplementation`. Avec Maven : les deux mêmes `<dependency>` dans `pom.xml`.
 
 **2. Rien à déclarer.** Construite par Bup, l'application reçoit `?crystallon` dans ses `uses` sans l'écrire : Bup lit le marqueur de `gluonify-plasma-crystallon-client` dans le chemin de classes d'exécution (SDK 0.7.1 et suivants) et ajoute le service en facultatif ; [`gluonify.json`](gluonify.json) ne le mentionne pas. Déployée à la main (`PUT /apps` : pas de build, donc pas de déduction), la spécification le déclare : `crystallon` dans les `uses` de [`deploy/appspec.json`](deploy/appspec.json). Dans les deux cas, la plateforme **ouvre le réseau** vers Crystallon, et vers lui seul, et fournit son adresse et le jeton propre de l'application. **Il n'y a ni propriété, ni URL, ni jeton dans ce dépôt** : le producteur de `gluonify-plasma-quarkus` donne au code un `CrystallonClient` (le mapper Jackson 3 de l'application, l'adresse et le jeton trouvés par le SDK). [`Documents`](src/main/java/io/gluonify/source/documents/Documents.java) demande seulement si Crystallon est disponible (`GluonifyServices.optional("crystallon")`) et injecte le client en `Instance<CrystallonClient>`. **Sans cela la fonction est éteinte et rien d'autre ne change** : le point d'accès répond 404 en disant pourquoi, `GET /api/platform` indique `"documents": false`, l'interface masque la section, l'application démarre et tous les autres tests passent sans Crystallon. L'endroit où tourne l'application décide comment le SDK trouve Crystallon :
 
@@ -368,7 +370,7 @@ Déclarez-la dans `"uses"` : la plateforme fournit `GLUONIFY_SERVICE_<APP>_URL` 
 ## 8. Construire
 
 ```bash
-./gradlew test                       # tests Java (121)
+./gradlew test                       # tests Java (125)
 ./gradlew build                    # JVM : build/quarkus-app/ ; construit aussi l'interface (Quinoa)
 ```
 
@@ -429,7 +431,7 @@ Mettre à jour : même `PUT` (ou nouveau build) ; les répliques sont remplacée
 ## 10. Tester
 
 ```bash
-./gradlew test                                 # 121 tests Java
+./gradlew test                                 # 125 tests Java
 cd src/main/webui && npm install && npm test   # 40 tests d'interface
 ```
 
@@ -471,6 +473,7 @@ Un test d'API se copie de `NotesResourceTest` ; un test de stockage de `FileNote
 | Symptôme | Cause probable |
 |---|---|
 | 401 en production | pas de jeton, jeton expiré, ou **audience** différente de `GLUONIFY_SOURCE_OIDC_AUDIENCE` ; ou `GLUONIFY_SOURCE_OIDC_ISSUER` ne correspond pas à l'`iss` du jeton |
+| 500 sur chaque appel avec jeton, journal `OIDC Server is not available` après `PKIX path building failed` | Charm est servi sur le TLS interne et l'application ne fait pas confiance à la racine du cluster : SDK antérieur à 0.7.5 (`gluonifySdkVersion` : `gluonify-plasma-quarkus-tls` absent du classpath), ou pas de `GLUONIFY_CA_FILE` dans l'instance (§6) |
 | 403 | jeton valide mais sans le rôle (`source:read` / `source:write`) |
 | Pas de bouton *Se connecter*, la page cite `GLUONIFY_SOURCE_OIDC_CLIENT_ID` | l'identifiant de client n'est pas fourni, ou l'adresse publique de Charm est inconnue (`GLUONIFY_SOURCE_OIDC_ISSUER` laissé à `any` et pas de `GLUONIFY_SOURCE_CHARM_PUBLIC_URL`) |
 | Charm refuse la connexion (`redirect_uri`, `invalid_target`) | la redirection du client n'est pas exactement l'adresse de l'interface (barre finale comprise), ou ses audiences ne contiennent pas `gluonify-source` |
